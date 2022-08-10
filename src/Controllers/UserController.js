@@ -1,4 +1,4 @@
-const { hash } = require("bcryptjs");
+const { hash, compare } = require("bcryptjs");
 const AppError = require("../utils/AppError");
 
 const sqliteConnection = require("../database/sqlite");
@@ -28,7 +28,7 @@ class UserController {
   }
 
   async update(request, response) {
-    const { name, email } = request.body;
+    const { name, email, password, old_password } = request.body;
     const { id } = request.params;
 
     const database = await sqliteConnection();
@@ -38,19 +38,44 @@ class UserController {
       throw new AppError("Usuário não encontrado!");
     }
 
-    const userWithUpdatedEmail = await database.get("SELECT * FROM users WHERE email = (?)",[email]);
 
-    if(userWithUpdatedEmail && userWithUpdatedEmail.id !== user.id){
+    const userWithUpdatedEmail = await database.get(
+      "SELECT * FROM users WHERE email = (?)",
+      [email]
+    );
+
+    if (userWithUpdatedEmail && userWithUpdatedEmail.id !== user.id) {
       throw new AppError("Este e-email já está em uso.");
     }
+    // nullish operator , se o name = vazio, então utiliza o valor de user.name
+    user.name = name ?? user.name;
+    user.email = email ?? user.email;
 
-    user.name = name;
-    user.email = email;
-    await database.run("UPDATE users SET name = ?, email = ?, updated_at = ? WHERE id = ?",
-    [(user.name, user.email, new Date(), id)]);
+    if(password) {
+      throw new AppError("Você precisa informar a senha antiga para definir a nova senha");
+    }
 
-    console.log(name, email, id )
-    return response.json();
+    if(password && old_password) {
+      const checkOldPassword = await compare(old_password, user.password);
+      console.log(checkOldPassword);
+      if (!checkOldPassword) {
+        throw new AppError("A senha antiga não confere.");
+      }
+      user.password = await hash(password, 8);
+    }
+    console.log("passou aqui 3");
+    await database.run(
+      `
+        UPDATE users SET
+        name = ?,
+        email = ?,
+        password = ?
+        WHERE id = ?`,
+      [user.name, user.email, user.password, id]
+    );
+    console.log("passou aqui");
+
+    return response.status(200).json();
   }
 }
 
