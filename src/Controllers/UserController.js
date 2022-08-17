@@ -34,12 +34,9 @@ class UserController {
     const database = await sqliteConnection();
     const user = await database.get("SELECT * FROM users WHERE id = (?)", [id]);
 
-    console.log(user)
-
-    if(!user) {
+    if (!user) {
       throw new AppError("Usuário não encontrado!");
     }
-
 
     const userWithUpdatedEmail = await database.get(
       "SELECT * FROM users WHERE email = (?)",
@@ -53,19 +50,21 @@ class UserController {
     user.name = name ?? user.name;
     user.email = email ?? user.email;
 
-    if(password) {
-      throw new AppError("Você precisa informar a senha antiga para definir a nova senha");
+    if (!password) {
+      throw new AppError(
+        "Você precisa informar a senha antiga para definir a nova senha"
+      );
     }
 
-    if(password && old_password) {
+    if (password && old_password) {
       const checkOldPassword = await compare(old_password, user.password);
-      console.log(checkOldPassword);
+
       if (!checkOldPassword) {
         throw new AppError("A senha antiga não confere.");
       }
       user.password = await hash(password, 8);
     }
-    console.log("passou aqui 3");
+
     await database.run(
       `
         UPDATE users SET
@@ -75,7 +74,6 @@ class UserController {
         WHERE id = ?`,
       [user.name, user.email, user.password, id]
     );
-    console.log("passou aqui");
 
     return response.status(200).json();
   }
