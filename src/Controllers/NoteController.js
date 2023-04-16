@@ -29,7 +29,7 @@ class NotesController {
 
     await knex("tags").insert(TagsInsert);
 
-    response.json();
+   return response.json();
   }
 }
 
