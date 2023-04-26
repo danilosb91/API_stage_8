@@ -17,6 +17,7 @@ class NotesController {
         url: link
       }
     });
+    console.log(links.map())
     await knex("links").insert(linksInsert);
 
     const TagsInsert = tags.map(name => {
@@ -24,12 +25,15 @@ class NotesController {
         note_id,
         name,
         user_id
+
+        
       }
     });
 
     await knex("tags").insert(TagsInsert);
 
-   return response.json();
+   return response.status(201).json();
+  
   }
 }
 
