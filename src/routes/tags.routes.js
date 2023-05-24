@@ -6,7 +6,7 @@ const tagsRoutes = Router();
 
 const tagsController = new TagsController();
 
-tagsRoutes.get("/", tagsController.index);     
+tagsRoutes.get("/:user_id", tagsController.index);     
 
 
 
