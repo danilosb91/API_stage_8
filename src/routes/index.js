@@ -9,8 +9,8 @@ const tagsRoutes = require("./tags.routes");
 
 const routes = Router();
 
-routes.use("/sessions", sessionsRoutes);
 routes.use("/users", userRoutes);
+routes.use("/sessions", sessionsRoutes);
 routes.use("/notes", notesRoutes);
 routes.use("/tags", tagsRoutes);
 
