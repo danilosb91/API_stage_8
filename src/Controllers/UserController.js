@@ -27,7 +27,7 @@ class UserController {
     const { name, email, password, old_password } = request.body;
     const user_id = request.user.id;
 
-   
+   console.log(name, email, password, old_password);
 
     const database = await sqliteConnection();
     const user = await database.get("SELECT * FROM users WHERE id = (?)", [user_id]);
@@ -40,19 +40,21 @@ class UserController {
       "SELECT * FROM users WHERE email = (?)",
       [email]
     );
-    console.log(userWithUpdatedEmail && userWithUpdatedEmail.id !== user.id)
+
     if (userWithUpdatedEmail && userWithUpdatedEmail.id !== user.id) {
       throw new AppError("Este e-email já está em uso.");
     }
+
+   
     // nullish operator , se o name = vazio, então utiliza o valor de user.name
     user.name = name ?? user.name;
     user.email = email ?? user.email;
 
-    if (!password) {
-      throw new AppError(
-        "Você precisa informar a senha antiga para definir a nova senha"
-      );
-    }
+     if (!password) {
+       throw new AppError(
+         "Você precisa informar a senha antiga para definir a nova senha"
+       );
+     }
 
     if (password && old_password) {
       const checkOldPassword = await compare(old_password, user.password);

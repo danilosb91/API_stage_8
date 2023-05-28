@@ -63,7 +63,7 @@ class NotesController {
     const { title, user_id, tags } = request.query;
 
     let notes;
-
+   
 
     if(tags){
       const filterTags = tags.split(',').map(tag => tag.trim());
